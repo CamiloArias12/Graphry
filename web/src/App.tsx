@@ -17,7 +17,7 @@ export default function App() {
   }
   const addEdge = () => {
     //@ts-ignore
-    edges.current = ([{ data: { source: sourceRef.current?.value, target: targetRef.current?.value, value: valueRef.current?.value } }])
+    edges.current = ([...edges.current, { data: { source: sourceRef.current?.value, target: targetRef.current?.value, value: valueRef.current?.value } }])
     setGraphData({ nodes: nodes.current, edges: edges.current });
   }
 
@@ -50,6 +50,56 @@ export default function App() {
         <label >Value</label>
         <input ref={valueRef} />
         <button onClick={addEdge}>Add edge</button>
+      </div>
+
+      <div>
+        <button onClick={async () => {
+          const phases: any = {};
+
+          function findPhases(nodes) {
+            var lastNode = Object.keys(nodes[Object.keys(nodes).length - 1])[0];
+            phases[0] = 1;
+
+            for (let node in nodes) {
+              for (let key in nodes[node]) {
+                phases[key] = phases[node] + 1;
+              }
+            }
+            delete phases[lastNode];
+          }
+
+          let dict: any = {};
+          console.log(edges.current);
+          for (let edge of edges.current) {
+            const data = edge.data;
+            if (!(data.source in dict)) {
+              console.log(data.source);
+              dict[data.source] = {};
+            }
+
+            dict[data.source][data.target] = parseInt(data.value);
+          }
+
+          findPhases(dict);
+          console.log(phases);
+
+         const dataJson = await (await fetch("http://localhost:8000/data", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              nodes: JSON.stringify(dict),
+              phases: JSON.stringify(phases),
+            })
+          })).json();
+
+          console.log(dataJson);
+
+
+        }}>
+          Resolve
+        </button>
       </div>
     </>
   );
