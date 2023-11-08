@@ -56,32 +56,37 @@ export default function App() {
         <button onClick={async () => {
           const phases: any = {};
 
+          const offset = 'a'.charCodeAt(0);
+
           function findPhases(nodes) {
-            var lastNode = Object.keys(nodes[Object.keys(nodes).length - 1])[0];
+            const keys = Object.keys(nodes).sort();
+            const lastNode = keys[keys.length-1]
             phases[0] = 1;
 
-            for (let node in nodes) {
-              for (let key in nodes[node]) {
-                phases[key] = phases[node] + 1;
+            for (const node in nodes) {
+              for (const key in nodes[node]) {
+                phases[key] = phases[node]  + 1;
               }
             }
-            delete phases[lastNode];
+            delete phases[parseInt(lastNode)+1];
           }
 
           let dict: any = {};
-          console.log(edges.current);
           for (let edge of edges.current) {
             const data = edge.data;
-            if (!(data.source in dict)) {
-              console.log(data.source);
-              dict[data.source] = {};
+            const sourceOffset = data.source.charCodeAt(0)-offset;
+            const targetOffset = data.target.charCodeAt(0)-offset;
+
+            if (!(sourceOffset in dict)) {
+              dict[sourceOffset] = {};
             }
 
-            dict[data.source][data.target] = parseInt(data.value);
+            dict[sourceOffset][targetOffset] = parseInt(data.value);
           }
 
           findPhases(dict);
-          console.log(phases);
+          console.log(JSON.stringify(dict));;
+          console.log(JSON.stringify(phases));;
 
          const dataJson = await (await fetch("http://localhost:8000/data", {
             method: "POST",
