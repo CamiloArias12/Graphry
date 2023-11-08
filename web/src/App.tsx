@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
+import { layout, styleSheet } from "./styles";
 
 export default function App() {
   const nodes = useRef<Array<any>>([]);
@@ -10,6 +11,10 @@ export default function App() {
   const sourceRef = useRef<HTMLInputElement>(null);
   const targetRef = useRef<HTMLInputElement>(null);
   const valueRef = useRef<HTMLInputElement>(null);
+  const [dataAPI, setDataAPI] = useState<{
+    solution: any,
+    way: Array<Array<any>>
+  }>();
 
   const addNode = () => {
     nodes.current.push({ data: { id: nodeRef.current?.value } });
@@ -60,22 +65,22 @@ export default function App() {
 
           function findPhases(nodes) {
             const keys = Object.keys(nodes).sort();
-            const lastNode = keys[keys.length-1]
+            const lastNode = keys[keys.length - 1]
             phases[0] = 1;
 
             for (const node in nodes) {
               for (const key in nodes[node]) {
-                phases[key] = phases[node]  + 1;
+                phases[key] = phases[node] + 1;
               }
             }
-            delete phases[parseInt(lastNode)+1];
+            delete phases[parseInt(lastNode) + 1];
           }
 
           let dict: any = {};
           for (let edge of edges.current) {
             const data = edge.data;
-            const sourceOffset = data.source.charCodeAt(0)-offset;
-            const targetOffset = data.target.charCodeAt(0)-offset;
+            const sourceOffset = data.source.charCodeAt(0) - offset;
+            const targetOffset = data.target.charCodeAt(0) - offset;
 
             if (!(sourceOffset in dict)) {
               dict[sourceOffset] = {};
@@ -85,10 +90,7 @@ export default function App() {
           }
 
           findPhases(dict);
-          console.log(JSON.stringify(dict));;
-          console.log(JSON.stringify(phases));;
-
-         const dataJson = await (await fetch("http://localhost:8000/data", {
+          const dataJson = await (await fetch("http://localhost:8000/data", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -99,76 +101,48 @@ export default function App() {
             })
           })).json();
 
-          console.log(dataJson);
-
-
+          const way = JSON.parse(dataJson.way);
+          const solution = JSON.parse(dataJson.solution);
+          setDataAPI({
+            way: way,
+            solution: solution
+          });
         }}>
           Resolve
         </button>
       </div>
+
+      {
+        dataAPI?.way &&
+
+        <>
+          <h2>Best way</h2>
+          {
+            dataAPI.way.map((value) => {
+              return value.map((path, index) => {
+                const nodeLabel = String.fromCharCode('a'.charCodeAt(0) + parseInt(path));
+                return (
+                  <>
+                    <span>{nodeLabel}</span>
+                    {
+                      value.length - 1 != index && <span>{" -> "}</span>
+                    }
+                  </>
+                )
+              });
+            })
+          }
+        </>
+      }
+
+      {
+        dataAPI?.solution &&
+        <>
+
+        </>
+      }
     </>
   );
 }
-
-const layout = {
-  name: "breadthfirst",
-  fit: true,
-  directed: true,
-  padding: 50,
-  animate: true,
-  animationDuration: 1000,
-  avoidOverlap: true,
-  nodeDimensionsIncludeLabels: false
-};
-
-const styleSheet = [
-  {
-    selector: "node",
-    style: {
-      backgroundColor: "#4a56a6",
-      width: 30,
-      height: 30,
-      label: "data(id)",
-      "overlay-padding": "6px",
-      "z-index": "10",
-      //text props
-      "text-outline-color": "#4a56a6",
-      "text-outline-width": "2px",
-      color: "white",
-      fontSize: 20
-    }
-  },
-  {
-    selector: "node:selected",
-    style: {
-      "border-width": "6px",
-      "border-color": "#AAD8FF",
-      "border-opacity": "0.5",
-      "background-color": "#77828C",
-      width: 70,
-      height: 70,
-      "text-outline-color": "#77828C",
-      "text-outline-width": 8
-    }
-  },
-  {
-    selector: "node[type='device']",
-    style: {
-      shape: "rectangle"
-    }
-  },
-  {
-    selector: "edge",
-    style: {
-      width: 6,
-      "line-color": "#AAD8FF",
-      label: "data(value)",
-      "target-arrow-color": "#6774cb",
-      "target-arrow-shape": "triangle",
-      "curve-style": "bezier"
-    }
-  }
-];
-
 
 
