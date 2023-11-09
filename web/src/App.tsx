@@ -195,7 +195,7 @@ export default function App() {
 
           <div>
 
-            <table style={{ display: "flex", flexDirection: "column-reverse", gap: 20 }}>
+            <table style={{ display: "flex", flexDirection: "column-reverse", gap: 20, border: "1px  solid", padding: "10px"}}>
               {
                 dataAPI?.phases && Object.keys(dataAPI.phases).sort().map((key) => {
                   const phase = dataAPI.phases[key];
@@ -237,7 +237,7 @@ export default function App() {
                       </tr>
 
 
-                      <tr style={{ display: "flex", justifyContent: "space-between" }}>
+                      <tr style={{ display: "flex", justifyContent: "space-between", background: "rgb(219, 221, 237)"}}>
                         <th>{"s"}</th>
                         {
 
@@ -249,7 +249,7 @@ export default function App() {
                         <th>{`f${phase}(s)`}</th>
                         <th>{`x${phase}`}</th>
                       </tr>
-                      <caption>Phase {phase}</caption>
+                      <caption style={{borderBottom: "1px solid"}}>Phase {phase}</caption>
                     </>
                   );
                 })
