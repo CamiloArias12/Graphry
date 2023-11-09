@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import { layout, styleSheet } from "./styles";
+import "./App.css"
 
 export default function App() {
   const nodes = useRef<Array<any>>([]);
@@ -31,9 +32,7 @@ export default function App() {
       <CytoscapeComponent
         elements={CytoscapeComponent.normalizeElements(graphData)}
         pan={{ x: 200, y: 200 }}
-        style={{ width: "100%", height: "350px" }}
-        zoomingEnabled={true}
-        maxZoom={3}
+        style={{ width: "100%", height: "100vh" }}
         minZoom={0.1}
         autounselectify={false}
         boxSelectionEnabled={true}
@@ -41,106 +40,131 @@ export default function App() {
         stylesheet={styleSheet}
       />
 
-      <div>
-        <label >Name</label>
-        <input type="text" ref={nodeRef} />
-        <button onClick={addNode}>Add node</button>
-      </div>
+      <div style={{
+        position: "absolute", top: 0, width: "30%", height: "100vh", flexDirection: "column", justifyItems: "center", alignItems: "center", background: "#fafafa",
+        boxShadow: "0px 0px 10px #a0a0a0", padding: "20px", boxSizing: "border-box"
+      }}>
 
-      <div>
-        <label >source</label>
-        <input ref={sourceRef} />
-        <label >target</label>
-        <input ref={targetRef} />
-        <label >Value</label>
-        <input ref={valueRef} />
-        <button onClick={addEdge}>Add edge</button>
-      </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-      <div>
-        <button onClick={async () => {
-          const phases: any = {};
+          <div style={{ display: "flex", justifyContent: "center", fontSize: "25px" }}>
+            <h1 style={{ color: "#4a56a6" }}>Graphy</h1>
+          </div>
 
-          const offset = 'a'.charCodeAt(0);
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", alignItems: "center" }}>
+            <label>Name</label>
+            <input type="text" ref={nodeRef} />
+            <button onClick={addNode}>Add node</button>
+          </div>
 
-          function findPhases(nodes) {
-            const keys = Object.keys(nodes).sort();
-            const lastNode = keys[keys.length - 1]
-            phases[0] = 1;
+          <div style={{ display: "flex", gap: 10, justifyItems: "center", alignItems: "center" }}>
+            <label >source</label>
+            <input ref={sourceRef} />
+            <label >target</label>
+            <input ref={targetRef} />
+            <label >Value</label>
+            <input ref={valueRef} />
+            <button onClick={addEdge}>Add edge</button>
+          </div>
 
-            for (const node in nodes) {
-              for (const key in nodes[node]) {
-                phases[key] = phases[node] + 1;
+          <div>
+            <button onClick={async () => {
+              const phases: any = {};
+
+              const offset = 'a'.charCodeAt(0);
+
+              function findPhases(nodes) {
+                const keys = Object.keys(nodes).sort();
+                const lastNode = keys[keys.length - 1]
+                phases[0] = 1;
+
+                for (const node in nodes) {
+                  for (const key in nodes[node]) {
+                    phases[key] = phases[node] + 1;
+                  }
+                }
+                delete phases[parseInt(lastNode) + 1];
               }
-            }
-            delete phases[parseInt(lastNode) + 1];
-          }
 
-          let dict: any = {};
-          for (let edge of edges.current) {
-            const data = edge.data;
-            const sourceOffset = data.source.charCodeAt(0) - offset;
-            const targetOffset = data.target.charCodeAt(0) - offset;
+              let dict: any = {};
+              for (let edge of edges.current) {
+                const data = edge.data;
+                const sourceOffset = data.source.charCodeAt(0) - offset;
+                const targetOffset = data.target.charCodeAt(0) - offset;
 
-            if (!(sourceOffset in dict)) {
-              dict[sourceOffset] = {};
-            }
+                if (!(sourceOffset in dict)) {
+                  dict[sourceOffset] = {};
+                }
 
-            dict[sourceOffset][targetOffset] = parseInt(data.value);
-          }
+                dict[sourceOffset][targetOffset] = parseInt(data.value);
+              }
 
-          findPhases(dict);
-          const dataJson = await (await fetch("http://localhost:8000/data", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              nodes: JSON.stringify(dict),
-              phases: JSON.stringify(phases),
-            })
-          })).json();
+              findPhases(dict);
+              const dataJson = await (await fetch("http://localhost:8000/data", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  nodes: JSON.stringify(dict),
+                  phases: JSON.stringify(phases),
+                })
+              })).json();
 
-          const way = JSON.parse(dataJson.way);
-          const solution = JSON.parse(dataJson.solution);
-          setDataAPI({
-            way: way,
-            solution: solution
-          });
-        }}>
-          Resolve
-        </button>
-      </div>
-
-      {
-        dataAPI?.way &&
-
-        <>
-          <h2>Best way</h2>
-          {
-            dataAPI.way.map((value) => {
-              return value.map((path, index) => {
-                const nodeLabel = String.fromCharCode('a'.charCodeAt(0) + parseInt(path));
-                return (
-                  <>
-                    <span>{nodeLabel}</span>
-                    {
-                      value.length - 1 != index && <span>{" -> "}</span>
-                    }
-                  </>
-                )
+              const way = JSON.parse(dataJson.way);
+              const solution = JSON.parse(dataJson.solution);
+              setDataAPI({
+                way: way,
+                solution: solution
               });
-            })
-          }
-        </>
-      }
+            }}>
+              Resolve
+            </button>
+          </div>
+          <div>
 
-      {
-        dataAPI?.solution &&
-        <>
+            {
+              dataAPI?.way &&
 
-        </>
-      }
+              <>
+                <h2>Best way</h2>
+                {
+                  dataAPI.way.map((value) => {
+                    return value.map((path, index) => {
+                      const nodeLabel = String.fromCharCode('a'.charCodeAt(0) + parseInt(path));
+                      return (
+                        <>
+                          <span>{nodeLabel}</span>
+                          {
+                            value.length - 1 != index && <span>{" -> "}</span>
+                          }
+                        </>
+                      )
+                    });
+                  })
+                }
+              </>
+            }
+
+
+          </div>
+
+          <div>
+
+            <table>
+              {
+                dataAPI?.solution && Object.keys(dataAPI.solution).sort().map((value) => {
+                  const edges = dataAPI.solution[value];
+                  return (
+                    <tr>
+                    </tr>
+                  );
+                })
+              }
+            </table>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
