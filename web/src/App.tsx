@@ -3,6 +3,14 @@ import CytoscapeComponent from "react-cytoscapejs";
 import { layout, styleSheet } from "./styles";
 import "./App.css"
 
+function isLetter(str) {
+  return str.length === 1 && str.match(/[a-z]/i);
+}
+
+let isCharacter = false;
+
+
+
 export default function App() {
   const nodes = useRef<Array<any>>([]);
   const edges = useRef<Array<any>>([]);
@@ -71,6 +79,8 @@ export default function App() {
 
           <div>
             <button onClick={async () => {
+              console.log(nodes.current)
+              console.log(edges.current)
               const phases: any = {};
 
               const offset = 'a'.charCodeAt(0);
@@ -91,8 +101,18 @@ export default function App() {
               let dict: any = {};
               for (let edge of edges.current) {
                 const data = edge.data;
-                const sourceOffset = data.source.charCodeAt(0) - offset;
-                const targetOffset = data.target.charCodeAt(0) - offset;
+                isCharacter = isLetter(data.source);
+                let sourceOffset = 0;
+                let targetOffset = 0;
+
+
+                if (isCharacter) {
+                  sourceOffset = data.source.charCodeAt(0) - offset;
+                  targetOffset = data.target.charCodeAt(0) - offset;
+                } else {
+                  sourceOffset = parseInt(data.source);
+                  targetOffset = parseInt(data.target)
+                }
 
                 if (!(sourceOffset in dict)) {
                   dict[sourceOffset] = {};
@@ -138,7 +158,12 @@ export default function App() {
                       <div style={{ display: "flex", justifyItems: "center", alignItems: "center", gap: "5px" }}>
                         {
                           value.map((path, index) => {
-                            const nodeLabel = String.fromCharCode('a'.charCodeAt(0) + parseInt(path));
+                            let nodeLabel: any = 0;
+                            if (isCharacter) {
+                              nodeLabel = String.fromCharCode('a'.charCodeAt(0) + parseInt(path));
+                            } else {
+                              nodeLabel = parseInt(path);
+                            }
                             return (
                               <>
                                 <span style={{
@@ -194,6 +219,7 @@ export default function App() {
                     <>
                       <tr style={{ display: "flex", justifyContent: "space-between" }}>
                         {Object.keys(phases).map((node) => {
+                          console.log(phases);
                           const phase = phases[node];
                           return (
                             <>
@@ -214,6 +240,7 @@ export default function App() {
                       <tr style={{ display: "flex", justifyContent: "space-between" }}>
                         <th>{"s"}</th>
                         {
+
                           [...targetSet].map((target) => {
                             //@ts-ignore
                             return (<th>{target}</th>);
