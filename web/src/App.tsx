@@ -44,7 +44,7 @@ export default function App() {
       </div>
 
       <div style={{
-        position: "absolute", top: 0, width: "40vw", flexDirection: "column", justifyItems: "center", alignItems: "center", padding: "20px", boxSizing: "border-box",background: "#FBFCFD", minHeight: "100vh"
+        position: "absolute", top: 0, width: "50vw", flexDirection: "column", justifyItems: "center", alignItems: "center", padding: "20px", boxSizing: "border-box", background: "#FBFCFD", minHeight: "100vh"
       }}>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -129,24 +129,40 @@ export default function App() {
             {
               dataAPI?.way &&
 
-              <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 <h2>Best way</h2>
                 {
                   dataAPI.way.map((value) => {
-                    return value.map((path, index) => {
-                      const nodeLabel = String.fromCharCode('a'.charCodeAt(0) + parseInt(path));
-                      return (
-                        <>
-                          <span>{nodeLabel}</span>
-                          {
-                            value.length - 1 != index && <span>{" -> "}</span>
-                          }
-                        </>
-                      )
-                    });
+                    return (
+
+                      <div style={{ display: "flex", justifyItems: "center", alignItems: "center", gap: "5px" }}>
+                        {
+                          value.map((path, index) => {
+                            const nodeLabel = String.fromCharCode('a'.charCodeAt(0) + parseInt(path));
+                            return (
+                              <>
+                                <span style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  padding: "5px",
+                                  background: "#DBDDED",
+                                  borderRadius: "100px",
+                                  width: "30px",
+                                  height: "30px",
+                                }}>{nodeLabel}</span>
+                                {
+                                  value.length - 1 != index && <span>{" -> "}</span>
+                                }
+                              </>
+                            )
+                          })
+                        }
+                      </div>
+                    )
                   })
                 }
-              </>
+              </div>
             }
 
 

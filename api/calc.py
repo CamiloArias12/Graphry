@@ -2,8 +2,8 @@ import copy
 import json
 
 
-def solver(graph: dict, phases: dict):
-    validate_graph(graph, phases)
+def stagecoach(graph: dict, phases: dict):
+    validate(graph, phases)
     reversed_graph = dict(reversed(list(graph.items())))
     solved_graph = copy.deepcopy(walk_graph(
         reversed_graph, graph, phases))
@@ -14,10 +14,10 @@ def solver(graph: dict, phases: dict):
     return nodes_json, path_json
 
 
-def validate_graph(graph: dict, phases: dict):
+def validate(graph: dict, phases: dict):
     graph_copy = copy.deepcopy(graph)
     if len(list(graph_copy.keys())) == 0 or len(list(phases.keys())) == 0:
-        raise Exception("DICCIONARIO VACIO")
+        raise Exception("empty")
     last_phase = phases[list(graph_copy.keys())[-1]]
     for key, value in graph_copy.items():
         f_phase = phases[key]
