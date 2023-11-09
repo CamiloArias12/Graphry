@@ -13,6 +13,7 @@ export default function App() {
   const targetRef = useRef<HTMLInputElement>(null);
   const valueRef = useRef<HTMLInputElement>(null);
   const [dataAPI, setDataAPI] = useState<{
+    phases: any,
     solution: any,
     way: Array<Array<any>>
   }>();
@@ -29,20 +30,21 @@ export default function App() {
 
   return (
     <>
-      <CytoscapeComponent
-        elements={CytoscapeComponent.normalizeElements(graphData)}
-        pan={{ x: 200, y: 200 }}
-        style={{ width: "100%", height: "100vh" }}
-        minZoom={0.1}
-        autounselectify={false}
-        boxSelectionEnabled={true}
-        layout={layout}
-        stylesheet={styleSheet}
-      />
+      <div>
+        <CytoscapeComponent
+          elements={CytoscapeComponent.normalizeElements(graphData)}
+          pan={{ x: 200, y: 200 }}
+          style={{ width: "100%", height: "100vh" }}
+          minZoom={0.1}
+          autounselectify={false}
+          boxSelectionEnabled={true}
+          layout={layout}
+          stylesheet={styleSheet}
+        />
+      </div>
 
       <div style={{
-        position: "absolute", top: 0, width: "30%", height: "100vh", flexDirection: "column", justifyItems: "center", alignItems: "center", background: "#fafafa",
-        boxShadow: "0px 0px 10px #a0a0a0", padding: "20px", boxSizing: "border-box"
+        position: "absolute", top: 0, width: "40vw", flexDirection: "column", justifyItems: "center", alignItems: "center", padding: "20px", boxSizing: "border-box",background: "#FBFCFD", minHeight: "100vh"
       }}>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -115,7 +117,8 @@ export default function App() {
               const solution = JSON.parse(dataJson.solution);
               setDataAPI({
                 way: way,
-                solution: solution
+                solution: solution,
+                phases: phases
               });
             }}>
               Resolve
@@ -151,13 +154,60 @@ export default function App() {
 
           <div>
 
-            <table>
+            <table style={{ display: "flex", flexDirection: "column-reverse", gap: 20 }}>
               {
-                dataAPI?.solution && Object.keys(dataAPI.solution).sort().map((value) => {
-                  const edges = dataAPI.solution[value];
+                dataAPI?.phases && Object.keys(dataAPI.phases).sort().map((key) => {
+                  const phase = dataAPI.phases[key];
+                  const phases: any = {};
+                  for (const key in dataAPI.solution) {
+                    const item = dataAPI.solution[key];
+                    if (item.phase == phase) {
+                      phases[key] = item;
+                    }
+                  }
+
+                  const targetSet = new Set();
+                  Object.keys(phases).map((node) => {
+                    const target = phases[node]['f(s,x)'];
+                    Object.keys(target).map((targetKey) => {
+                      targetSet.add(targetKey);
+                    })
+                  })
+
                   return (
-                    <tr>
-                    </tr>
+                    <>
+                      <tr style={{ display: "flex", justifyContent: "space-between" }}>
+                        {Object.keys(phases).map((node) => {
+                          const phase = phases[node];
+                          return (
+                            <>
+                              <td>{node}</td>
+                              {
+                                [...targetSet].map((target) => {
+                                  return <td>{phase['f(s,x)'][target]}</td>
+                                })
+                              }
+                              <td>{phase['f*(s)']}</td>
+                              <td>{phase['x*']}</td>
+                            </>)
+
+                        })}
+                      </tr>
+
+
+                      <tr style={{ display: "flex", justifyContent: "space-between" }}>
+                        <th>{"s"}</th>
+                        {
+                          [...targetSet].map((target) => {
+                            //@ts-ignore
+                            return (<th>{target}</th>);
+                          })
+                        }
+                        <th>{`f${phase}(s)`}</th>
+                        <th>{`x${phase}`}</th>
+                      </tr>
+                      <caption>Phase {phase}</caption>
+                    </>
                   );
                 })
               }

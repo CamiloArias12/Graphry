@@ -68,7 +68,7 @@ def walk_graph(reversed_graph: dict, original_graph: dict, phases: dict):
 
     find_node_to_go(reversed_graph)
     for key, phase in phases.items():
-        reversed_graph.get(key)["etapa"] = phase
+        reversed_graph.get(key)["phase"] = phase
     return reversed_graph
 
 

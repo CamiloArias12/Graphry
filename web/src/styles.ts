@@ -6,7 +6,7 @@ export const layout = {
   animate: true,
   animationDuration: 1000,
   avoidOverlap: true,
-  nodeDimensionsIncludeLabels: false
+  nodeDimensionsIncludeLabels: false,
 };
 
 export const styleSheet = [
